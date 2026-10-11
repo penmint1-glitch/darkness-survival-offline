@@ -20,15 +20,16 @@ Traditional Chinese, no suffix is the original English/Korean text.
 
 | File | Language | Network | Size | What it does |
 |---|---|---|---|---|
-| `darkness_survival_offline_simplified.apk` | Simplified Chinese | full offline takeover | 92.1 MB | **recommended** — every feature works: box economy, runes, recipes, resurrection |
-| `darkness_survival_safe_simplified.apk` | Simplified Chinese | conservative | 92.1 MB | answers only boss boxes + achievements; smallest change surface |
+| `darkness_survival_offline_simplified.apk` | Simplified Chinese | full offline takeover | 78.9 MB | **recommended** — every feature works: box economy, runes, recipes, resurrection |
+| `darkness_survival_safe_simplified.apk` | Simplified Chinese | conservative | 78.9 MB | answers only boss boxes + achievements; smallest change surface |
 | `darkness_survival_offline.apk` | original (English) | full offline takeover | 80.6 MB | same patches, untouched text **and** untouched fonts |
 | `darkness_survival_safe.apk` | original (English) | conservative | 80.6 MB | same, conservative responder |
 | `darkness_survival_baseline.apk` | original (English) | none | 80.6 MB | diagnostic only: unmodified native library, re-signed — isolates base-game bugs from patch bugs |
 
-The Simplified builds are ~12 MB larger because they carry a full CJK font in **two**
-file slots (see [Fonts](#fonts)). All builds need a device with 32-bit
-**`armeabi`** support — the game ships only `lib/armeabi/libcocos2dcpp.so`.
+All builds need a device with 32-bit **`armeabi`** support — the game ships only
+`lib/armeabi/libcocos2dcpp.so`. The Simplified builds are actually ~1.7 MB
+*smaller* than the English ones, because the replaced font is a subset (see
+[Fonts](#fonts)).
 
 Checksums: [`SHA256SUMS.txt`](SHA256SUMS.txt). Signatures verified with Google's
 own `apksig` (v1 + v2 + v3 = true).
@@ -70,12 +71,17 @@ all — that mismatch was the cause of a crash).
 
 | | |
 |---|---|
-| Face | **Noto Sans SC** (Regular), 30,890 glyphs |
+| Face | **Noto Sans SC** (Regular), subsetted — 1,520 glyphs kept out of 30,890 |
 | Licence | **SIL Open Font License 1.1** — redistribution inside an application permitted |
 | Upstream | <https://github.com/notofonts/noto-cjk> |
-| Size | 8,331,336 bytes per slot, 16.7 MB uncompressed across the two slots — this is what makes the Simplified APKs ~12 MB bigger |
+| Size | **325,884 bytes** per slot (3.9 % of the 8,331,336-byte original face); installed into both slots, so 651,768 bytes uncompressed in total |
 | Coverage | every character in the text table and in the 330 Cocos Studio `.csb` layouts |
 | Known gap | no Hangul. The native library has 379 Hangul syllables in hard-coded strings; those render blank. The English and Korean builds are unaffected. |
+
+The subset was produced with `fontTools.subset` from the character set actually
+used by the text table, the shipped `.csb` layouts, ASCII and the punctuation
+above; coverage was then verified against the subset's cmap (0 missing for the
+text table and for ASCII). The scripts are in `tools/`.
 
 An earlier build bundled a commercial Founder face (FZHuaLi-M14, 方正华隶); it was
 removed because redistributing it requires a paid licence. See
@@ -173,13 +179,13 @@ an agentic coding CLI) driving **DeepSeek** models.
 
 | 文件 | 语言 | 说明 | 体积 |
 |---|---|---|---|
-| `darkness_survival_offline_simplified.apk` | **简体中文** | **推荐**：完整离线接管，箱子经济/符文/配方/复活全部可用 | 92.1 MB |
-| `darkness_survival_safe_simplified.apk` | 简体中文 | 保守版：只应答 Boss 记忆之箱与成就，改动面最小 | 92.1 MB |
+| `darkness_survival_offline_simplified.apk` | **简体中文** | **推荐**：完整离线接管，箱子经济/符文/配方/复活全部可用 | 78.9 MB |
+| `darkness_survival_safe_simplified.apk` | 简体中文 | 保守版：只应答 Boss 记忆之箱与成就，改动面最小 | 78.9 MB |
 | `darkness_survival_offline.apk` | 原版（英文） | 同样补丁，文本**与字体**均保持原样 | 80.6 MB |
 | `darkness_survival_safe.apk` | 原版（英文） | 同上，保守版应答 | 80.6 MB |
 | `darkness_survival_baseline.apk` | 原版（英文） | 仅重新签名、零改动，用于区分"原版 bug"与"补丁 bug" | 80.6 MB |
 
-简体版比原版大 **约 12 MB**，因为它把一份完整 CJK 字体装进了**两个**字体槽（见下文「字体」）。
+简体版反而比原版**小约 1.7 MB**——替换的字体是**子集**（1,520 字形，326 KB，见下文「字体」）。
 所有版本都需要支持 32 位 **`armeabi`** 的设备（游戏只提供 `lib/armeabi/libcocos2dcpp.so`）。
 
 ### 安装
@@ -202,8 +208,7 @@ an agentic coding CLI) driving **DeepSeek** models.
 ### 说明
 
 - 游戏自带字体是**子集字体**（仅 4888 个朝鲜汉字 + 韩文），第二个字体槽 `arial.ttf` 更是完全没有中日韩字形，
-  因此简体版把**两个槽都换成 `Noto Sans SC` 完整字体**（30,890 字形，SIL OFL 1.1 许可）。
-  代价是 APK 比原版大 **约 12 MB**。
+  因此简体版把**两个槽都换成 `Noto Sans SC` 子集**（保留 1,520 字形，326 KB，SIL OFL 1.1 许可）。
 - 本仓库**不包含**原始游戏 APK，复现需要自备基础包。
 - 原游戏 © Zero++ Software, 2016，本补丁仅供个人保存使用，非商业用途。
 
