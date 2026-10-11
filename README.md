@@ -18,13 +18,17 @@ Built on top of the community restoration by
 Pick **one** APK. Names ending in `_simplified` are Simplified Chinese, `_zh` are
 Traditional Chinese, no suffix is the original English/Korean text.
 
-| File | Language | Network | What it does |
-|---|---|---|---|
-| `darkness_survival_offline_simplified.apk` | Simplified Chinese | full offline takeover | **recommended** — every feature works: box economy, runes, recipes, resurrection |
-| `darkness_survival_safe_simplified.apk` | Simplified Chinese | conservative | answers only boss boxes + achievements; smallest change surface |
-| `darkness_survival_offline.apk` | original (English) | full offline takeover | same patches, untouched text and fonts |
-| `darkness_survival_safe.apk` | original (English) | conservative | same, conservative responder |
-| `darkness_survival_baseline.apk` | original (English) | none | diagnostic only: unmodified native library, re-signed — isolates base-game bugs from patch bugs |
+| File | Language | Network | Size | What it does |
+|---|---|---|---|---|
+| `darkness_survival_offline_simplified.apk` | Simplified Chinese | full offline takeover | 92.1 MB | **recommended** — every feature works: box economy, runes, recipes, resurrection |
+| `darkness_survival_safe_simplified.apk` | Simplified Chinese | conservative | 92.1 MB | answers only boss boxes + achievements; smallest change surface |
+| `darkness_survival_offline.apk` | original (English) | full offline takeover | 80.6 MB | same patches, untouched text **and** untouched fonts |
+| `darkness_survival_safe.apk` | original (English) | conservative | 80.6 MB | same, conservative responder |
+| `darkness_survival_baseline.apk` | original (English) | none | 80.6 MB | diagnostic only: unmodified native library, re-signed — isolates base-game bugs from patch bugs |
+
+The Simplified builds are ~12 MB larger because they carry a full CJK font in **two**
+file slots (see [Fonts](#fonts)). All builds need a device with 32-bit
+**`armeabi`** support — the game ships only `lib/armeabi/libcocos2dcpp.so`.
 
 Checksums: [`SHA256SUMS.txt`](SHA256SUMS.txt). Signatures verified with Google's
 own `apksig` (v1 + v2 + v3 = true).
@@ -51,23 +55,42 @@ Requires Android with 32-bit `armeabi` support (the game ships only
 | No Box of Memories after a boss | the reply-22 handler only stores the reward when `result == 0`; the patch had forced `result = 1` | reply 22 now returns `result = 0` with the box payload (free slot, memory item, ground level) |
 | Free box via ads did nothing | the Unity Ads SDK no longer serves inventory, so the completion callback never fires | the JNI entry tail-jumps straight to the completion handler with `r2 = 1` |
 | 600 ancient-coin box unobtainable | the coins could not be bought and the cost literal was `-600` | cost literal → `0`; achievement payout 100 → 1000 |
-| Everything in Korean | no Chinese localization exists | 2978 text-table entries translated to Simplified Chinese |
+| Everything in Korean | no Chinese localization exists | 2978 text-table entries translated to Simplified Chinese (the `.csb` layouts are left untouched — their strings are runtime placeholders) |
 | Crash when tapping an unidentified item | four item records carry the bit pattern `0xBF800000` (-1.0f) as their name-text id; `Item::getNameTextIDByItemType` routes anything < -200 into `GameData::getScrollIndex()`, which has no bounds check | those four records set to `0`, the value 848 other nameless records already use |
 | Crash when tapping an **equippable** item (font atlas) | `FontFreeType::renderCharAt` ran off the end of the glyph atlas | the `.csb` layout files must **not** be touched — UI text is injected at runtime from the text table; the second font slot (`arial.ttf`) must carry a CJK font |
 
 Full byte-level details: [`docs/PATCH_NOTES.md`](docs/PATCH_NOTES.md).
 
+## Fonts
+
+The Simplified builds bundle **one** font and install it into **both**
+`assets/SeoulNamsanEB.ttf` and `assets/arial.ttf` (the game may render a given
+label through either slot, and the original second slot had no CJK coverage at
+all — that mismatch was the cause of a crash).
+
+| | |
+|---|---|
+| Face | **Noto Sans SC** (Regular), 30,890 glyphs |
+| Licence | **SIL Open Font License 1.1** — redistribution inside an application permitted |
+| Upstream | <https://github.com/notofonts/noto-cjk> |
+| Size | 8,331,336 bytes per slot, 16.7 MB uncompressed across the two slots — this is what makes the Simplified APKs ~12 MB bigger |
+| Coverage | every character in the text table and in the 330 Cocos Studio `.csb` layouts |
+| Known gap | no Hangul. The native library has 379 Hangul syllables in hard-coded strings; those render blank. The English and Korean builds are unaffected. |
+
+An earlier build bundled a commercial Founder face (FZHuaLi-M14, 方正华隶); it was
+removed because redistributing it requires a paid licence. See
+[`docs/LICENSE-FONT.txt`](docs/LICENSE-FONT.txt), which also records how to swap
+the face via the `DS_FONT_DIR` environment variable.
+
 ## Chinese localization notes
 
-The game ships a **subsetted** Korean font that only contains the 4888 KS-X Hanja,
-so a Simplified translation is impossible with it. The Simplified builds therefore
-replace `assets/SeoulNamsanEB.ttf` (and `arial.ttf`) with a
-**Noto Sans SC** subset (1415 glyphs, 257 KB, OFL licensed) — which also makes the
-APK ~2 MB smaller.
+The game ships a **subsetted** Korean face that only covers the 4888 KS-X Hanja
+and Hangul, and its second slot (`arial.ttf`) has no CJK coverage at all — so a
+Simplified translation cannot be rendered with the shipped fonts. Both slots are
+therefore replaced (see [Fonts](#fonts)).
 
-The text lives in three places, all translated: `assets/textdata_*.dat`
-(1998 entries), the Cocos Studio layouts `assets/*.csb` (123 strings in 38 files),
-and 36 room/location names hard-coded in `.so` rodata.
+Text is translated in **one** place: the text table (`assets/textdata_*.dat`,
+2978 entries). The Cocos Studio `.csb` layouts are **not** touched — see above.
 
 ## Reproducing
 
@@ -121,7 +144,7 @@ an agentic coding CLI) driving **DeepSeek** models.
 
 * **Base restoration:** [MichaelExperuim/darkness-survival-restored](https://github.com/MichaelExperuim/darkness-survival-restored)
 * **Original game:** Darkness Survival, © Zero++ Software, 2016
-* **Bundled font subset:** Noto Sans SC, SIL Open Font License 1.1
+* **Bundled font:** Noto Sans SC (full face, 30,890 glyphs), SIL Open Font License 1.1
 
 ## Legal
 
@@ -130,8 +153,8 @@ an agentic coding CLI) driving **DeepSeek** models.
   preservation patch, not a re-release.
 * Built on the community restoration by
   [MichaelExperuim](https://github.com/MichaelExperuim/darkness-survival-restored).
-* The bundled `Noto Sans SC` font subset is licensed under the SIL Open Font
-  License 1.1; see `docs/LICENSE-NotoSansSC.txt`.
+* The bundled `Noto Sans SC` font is licensed under the SIL Open Font License
+  1.1; see `docs/LICENSE-FONT.txt` (the OFL text itself still needs to be added).
 * If you are a rights holder and want this removed, open an issue.
 
 ---
@@ -146,13 +169,16 @@ an agentic coding CLI) driving **DeepSeek** models.
 
 ### 下载哪个
 
-| 文件 | 语言 | 说明 |
-|---|---|---|
-| `darkness_survival_offline_simplified.apk` | **简体中文** | **推荐**：完整离线接管，箱子经济/符文/配方/复活全部可用 |
-| `darkness_survival_safe_simplified.apk` | 简体中文 | 保守版：只应答 Boss 记忆之箱与成就，改动面最小 |
-| `darkness_survival_offline.apk` | 原版（英文） | 同样补丁，文本与字体保持原样 |
-| `darkness_survival_safe.apk` | 原版（英文） | 同上，保守版应答 |
-| `darkness_survival_baseline.apk` | 原版（英文） | 仅重新签名、零改动，用于区分"原版 bug"与"补丁 bug" |
+| 文件 | 语言 | 说明 | 体积 |
+|---|---|---|---|
+| `darkness_survival_offline_simplified.apk` | **简体中文** | **推荐**：完整离线接管，箱子经济/符文/配方/复活全部可用 | 92.1 MB |
+| `darkness_survival_safe_simplified.apk` | 简体中文 | 保守版：只应答 Boss 记忆之箱与成就，改动面最小 | 92.1 MB |
+| `darkness_survival_offline.apk` | 原版（英文） | 同样补丁，文本**与字体**均保持原样 | 80.6 MB |
+| `darkness_survival_safe.apk` | 原版（英文） | 同上，保守版应答 | 80.6 MB |
+| `darkness_survival_baseline.apk` | 原版（英文） | 仅重新签名、零改动，用于区分"原版 bug"与"补丁 bug" | 80.6 MB |
+
+简体版比原版大 **约 12 MB**，因为它把一份完整 CJK 字体装进了**两个**字体槽（见下文「字体」）。
+所有版本都需要支持 32 位 **`armeabi`** 的设备（游戏只提供 `lib/armeabi/libcocos2dcpp.so`）。
 
 ### 安装
 
@@ -201,7 +227,12 @@ tapping an equippable item).
 
 The font is a single CJK face — **Noto Sans SC** (SIL Open Font License 1.1) —
 installed into **both** `assets/SeoulNamsanEB.ttf` and `assets/arial.ttf`, since
-the game may render a given label through either slot. See `docs/LICENSE-FONT.txt`.
+the game may render a given label through either slot. See [Fonts](#fonts).
+
+String length is also constrained deliberately: the game formats text with a
+hand-written **unbounded** `sprintf` into fixed caller stack buffers, so a
+translation longer than the Korean original is a stack-overflow risk. 268 strings
+that overshot were compressed back inside the Korean byte budget.
 
 Terminology follows a Western-fantasy / tabletop register (精准度 Accuracy,
 警戒陷阱 Alarm Trap, 毁灭护符 Amulet of Destruction, 奥术 Arcane, 镜像 Mirror
