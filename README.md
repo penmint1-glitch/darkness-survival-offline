@@ -42,7 +42,7 @@ own `apksig` (v1 + v2 + v3 = true).
 3. Launch. It goes straight to the title screen; no "Connecting to the Server".
 
 Requires Android with 32-bit `armeabi` support (the game ships only
-`lib/armeabi/libcocos2dcpp.so`). Tested working on Android 14 / Origin OS.
+`lib/armeabi/libcocos2dcpp.so`). Tested working on Android 14.
 
 ## What was broken, and what this patch does
 
