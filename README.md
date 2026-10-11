@@ -20,13 +20,11 @@ Traditional Chinese, no suffix is the original English/Korean text.
 
 | File | Language | Network | What it does |
 |---|---|---|---|
-| `darkness_survival_offline_simplified.apk` | 简体 | full offline takeover | **recommended** — every feature works, incl. the box economy |
-| `darkness_survival_offline_zh.apk` | 繁體 | full offline takeover | same, Traditional |
-| `darkness_survival_safe_simplified.apk` | 简体 | conservative | only the boss box + achievement rewards are answered |
-| `darkness_survival_safe_zh.apk` | 繁體 | conservative | same, Traditional |
-| `darkness_survival_offline.apk` | original | full offline takeover | original language files |
-| `darkness_survival_safe.apk` | original | conservative | original language files |
-| `darkness_survival_baseline.apk` | original | none (reference .so, re-signed) | diagnostic only: isolates base-version bugs from patch bugs |
+| `darkness_survival_offline_simplified.apk` | Simplified Chinese | full offline takeover | **recommended** — every feature works: box economy, runes, recipes, resurrection |
+| `darkness_survival_safe_simplified.apk` | Simplified Chinese | conservative | answers only boss boxes + achievements; smallest change surface |
+| `darkness_survival_offline.apk` | original (English) | full offline takeover | same patches, untouched text and fonts |
+| `darkness_survival_safe.apk` | original (English) | conservative | same, conservative responder |
+| `darkness_survival_baseline.apk` | original (English) | none | diagnostic only: unmodified native library, re-signed — isolates base-game bugs from patch bugs |
 
 Checksums: [`SHA256SUMS.txt`](SHA256SUMS.txt). Signatures verified with Google's
 own `apksig` (v1 + v2 + v3 = true).
@@ -53,7 +51,9 @@ Requires Android with 32-bit `armeabi` support (the game ships only
 | No Box of Memories after a boss | the reply-22 handler only stores the reward when `result == 0`; the patch had forced `result = 1` | reply 22 now returns `result = 0` with the box payload (free slot, memory item, ground level) |
 | Free box via ads did nothing | the Unity Ads SDK no longer serves inventory, so the completion callback never fires | the JNI entry tail-jumps straight to the completion handler with `r2 = 1` |
 | 600 ancient-coin box unobtainable | the coins could not be bought and the cost literal was `-600` | cost literal → `0`; achievement payout 100 → 1000 |
-| Everything in Korean | no Chinese localization exists | 1998 text-table entries + 123 UI/story strings in the `.csb` layouts + 36 hard-coded room names translated |
+| Everything in Korean | no Chinese localization exists | 2978 text-table entries translated to Simplified Chinese |
+| Crash when tapping an unidentified item | four item records carry the bit pattern `0xBF800000` (-1.0f) as their name-text id; `Item::getNameTextIDByItemType` routes anything < -200 into `GameData::getScrollIndex()`, which has no bounds check | those four records set to `0`, the value 848 other nameless records already use |
+| Crash when tapping an **equippable** item (font atlas) | `FontFreeType::renderCharAt` ran off the end of the glyph atlas | the `.csb` layout files must **not** be touched — UI text is injected at runtime from the text table; the second font slot (`arial.ttf`) must carry a CJK font |
 
 Full byte-level details: [`docs/PATCH_NOTES.md`](docs/PATCH_NOTES.md).
 
@@ -148,12 +148,11 @@ an agentic coding CLI) driving **DeepSeek** models.
 
 | 文件 | 语言 | 说明 |
 |---|---|---|
-| `darkness_survival_offline_simplified.apk` | **简体** | **推荐**：完整离线接管，箱子经济全部可用 |
-| `darkness_survival_offline_zh.apk` | 繁体 | 同上 |
-| `darkness_survival_safe_simplified.apk` | 简体 | 保守版：只应答 Boss 记忆之箱与成就奖励 |
-| `darkness_survival_safe_zh.apk` | 繁体 | 同上 |
-| `darkness_survival_offline.apk` / `_safe.apk` | 原语言 | 未中文化的版本 |
-| `darkness_survival_baseline.apk` | 原语言 | 仅重新签名、零改动，用于排查问题 |
+| `darkness_survival_offline_simplified.apk` | **简体中文** | **推荐**：完整离线接管，箱子经济/符文/配方/复活全部可用 |
+| `darkness_survival_safe_simplified.apk` | 简体中文 | 保守版：只应答 Boss 记忆之箱与成就，改动面最小 |
+| `darkness_survival_offline.apk` | 原版（英文） | 同样补丁，文本与字体保持原样 |
+| `darkness_survival_safe.apk` | 原版（英文） | 同上，保守版应答 |
+| `darkness_survival_baseline.apk` | 原版（英文） | 仅重新签名、零改动，用于区分"原版 bug"与"补丁 bug" |
 
 ### 安装
 
@@ -189,3 +188,34 @@ an agentic coding CLI) driving **DeepSeek** models.
 - 基础修复版：[MichaelExperuim/darkness-survival-restored](https://github.com/MichaelExperuim/darkness-survival-restored)
 - 原游戏：Darkness Survival，© Zero++ Software, 2016
 - 内置字体子集：Noto Sans SC（SIL Open Font License 1.1）
+
+---
+
+## Chinese localization
+
+Text lives in the **text table only** (2978 entries). The Cocos Studio `.csb`
+layouts are left **byte-identical to the base** — their Korean strings are
+placeholders that the game overwrites at runtime, and editing them corrupts the
+rich-text path that fills the glyph atlas (that was the cause of a crash when
+tapping an equippable item).
+
+The font is a single CJK face installed into **both** `assets/SeoulNamsanEB.ttf`
+and `assets/arial.ttf`; the game may render a given label through either slot.
+
+Terminology follows a Western-fantasy / tabletop register (精准度 Accuracy,
+警戒陷阱 Alarm Trap, 毁灭护符 Amulet of Destruction, 奥术 Arcane, 镜像 Mirror
+Image, 鉴定 Identify, 记忆之匣 Box of Memories). 109 machine-translation defects
+inherited from the reference localization were repaired — see
+`docs/translation_quality_fixes.md`.
+
+## Credits
+
+Reverse engineering, the byte-level patches, the Unicorn verification harness and
+the Chinese localization were produced with **[DeepSeek Harness](https://github.com/deepseek-ai/deepseek-harness)**
+(`@deepseek-ai/dsh`), an agentic coding CLI driving **DeepSeek** models.
+
+* **Base restoration:** [MichaelExperuim/darkness-survival-restored](https://github.com/MichaelExperuim/darkness-survival-restored)
+* **Reference localization:** the Simplified-Chinese text and the bundled CJK font
+  are adapted from a pre-existing fan translation (游乐园汉化), with its
+  machine-translation errors repaired and its watermark/attribution strings removed.
+* **Original game:** Darkness Survival, © Zero++ Software, 2016

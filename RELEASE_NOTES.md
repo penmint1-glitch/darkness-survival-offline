@@ -46,3 +46,40 @@ Built with **DeepSeek Harness** ([`@deepseek-ai/dsh` 0.2.0-rc.2](https://github.
 **DeepSeek** models. Base restoration by
 [MichaelExperuim](https://github.com/MichaelExperuim/darkness-survival-restored);
 original game © Zero++ Software, 2016.
+
+---
+
+## v1.1 — crash fixes, reference localization, quality repair
+
+**Crash: tapping an unidentified item**
+Four item records in the table at `0x85336c` (types 552, 576, 1114, 1138) hold
+`0xBF800000` — the bit pattern of `-1.0f` — where a name-text id belongs.
+`Item::getNameTextIDByItemType()` sends anything below -200 into
+`GameData::getScrollIndex()`, which has **no bounds check**
+(`ldr r0, [GameData + 4 + 4*(index+22)]`), so the read lands outside the heap.
+Reproduced under Unicorn by executing the real `Item::getNameText()` for every
+item type; fixed by setting those four records to `0`.
+
+**Crash: tapping an equippable item**
+`FontFreeType::renderCharAt` ran off the end of the glyph atlas with a garbage
+`dest` pointer. Root cause: our own edits to the `.csb` layout files corrupted
+the rich-text string feeding the atlas. The `.csb` files are now left untouched
+(byte-identical to the base) and UI text is injected from the text table only.
+
+**Chinese localization**
+- Simplified only.
+- One CJK font in **both** font slots.
+- Text adopted from an existing fan localization, then repaired: 109 quality
+  defects fixed (67 proper-noun / wrong-sense misreads, 35 dropped or invented
+  meanings, 4 polarity flips, 2 typos, 1 wrong number), plus 5 data-corruption
+  strings restored (a translator watermark replacing "Tap screen to start.", the
+  game's own credits replaced by an advert, an antonym flip, two dropped zeros).
+- Terminology normalised for a Western-fantasy register.
+
+**Verification**
+- `Item::getNameText()` swept over all 2600 item types — 0 faults.
+- Real reply handlers executed under Unicorn for replies 22 / 28 / 14 / 10.
+- Every translated string machine-checked: rich-text tag multiset and
+  `%d`/`%s` specifiers identical to the English source, no Hangul, no
+  Traditional-only characters, no length growth over the previous translation.
+- All APKs verified with Google `apksig` (v1 + v2 + v3).

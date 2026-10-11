@@ -1,0 +1,36 @@
+FONT LICENSING — READ BEFORE PUBLISHING
+=======================================
+
+The APKs in this project bundle a CJK font installed into BOTH
+`assets/SeoulNamsanEB.ttf` and `assets/arial.ttf`.
+
+Current face: **FZHuaLi-M14** (方正华隶), taken from a pre-existing fan
+localization of this game.
+
+>>> PROBLEM: FZHuaLi is a COMMERCIAL font by Beijing Founder Electronics
+>>> (北京北大方正电子有限公司). Redistributing it — which is what shipping it
+>>> inside an APK does — requires a commercial licence from Founder. This is a
+>>> real copyright exposure for a public repository, separate from the game
+>>> assets themselves.
+
+Recommended action: swap the bundled face for an open-licensed CJK font before
+publishing, e.g.
+
+  * Noto Sans CJK SC  — SIL Open Font License 1.1, covers Simplified Chinese
+    AND Hangul in one file.  https://github.com/notofonts/noto-cjk
+  * Source Han Sans SC — same font, SIL OFL 1.1.
+
+Then:
+  1. put the same file in both `assets/SeoulNamsanEB.ttf` and `assets/arial.ttf`;
+  2. verify coverage: every character in the text table must exist in the font's
+     cmap — a missing glyph crashes cocos2d's glyph-atlas path
+     (`FontFreeType::renderCharAt`), it does not merely render blank;
+  3. copy the OFL text into this file.
+
+`tools/build_zh_apk.py` accepts the font through the `DS_FONT_DIR` environment
+variable, so swapping the face does not require code changes.
+
+NOTE: the earlier attempt in this project to ship a subsetted Noto Sans SC face
+failed for an unrelated reason — the real crash cause was the modified Cocos
+Studio `.csb` layouts, not the font. Do not treat "the Noto build crashed" as
+evidence against Noto.
