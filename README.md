@@ -107,8 +107,10 @@ PYTHONPATH=pylibs python3 test_getters.py       work/libcocos2dcpp.so
 PYTHONPATH=pylibs python3 test_box_reward.py    work/libcocos2dcpp.so
 PYTHONPATH=pylibs python3 test_coin_economy.py  work/libcocos2dcpp.so
 
-# 3. localization (needs the extracted assets + the Noto subset)
-python3 zh/build_textdata.py ... ; python3 zh/patch_csb.py ; python3 zh/patch_so_strings.py ...
+# 3. localization - the text table ONLY; never touch the .csb layouts
+python3 tools/build_textdata.py ...        # apply the translations, keep the format
+# (patch_csb.py and patch_so_strings.py are kept for reference but are NOT used:
+#  editing .csb breaks the rich-text path, and the room-name strings are rodata)
 
 # 4. repackage + sign
 python3 zh/build_zh_apk.py work/libcocos2dcpp.sim.so work/textdata_sim.dat out.apk
@@ -195,13 +197,13 @@ an agentic coding CLI) driving **DeepSeek** models.
 - 本地应答取代死掉的服务器（结算画面、成就、箱子奖励不再卡住）
 - 修复"进入游戏即闪退"（应答函数栈/寄存器未还原）
 - 恢复打完 Boss 的记忆之箱奖励；广告奖励可用；600 古代硬币箱子免费
-- 全文中文化：1998 条主文本 + 123 条界面/剧情文字 + 36 个硬编码房间名
+- 全文中文化：**2978 条主文本**（只改文本表，`.csb` 布局一律不动）
 
 ### 说明
 
-- 游戏自带字体是**子集字体**（仅 4888 个朝鲜汉字），无法显示简体字，
-  因此简体版把字体替换为 **Noto Sans SC** 子集（1415 字形，257 KB，OFL 许可），
-  顺带让 APK 小了约 2 MB。
+- 游戏自带字体是**子集字体**（仅 4888 个朝鲜汉字 + 韩文），第二个字体槽 `arial.ttf` 更是完全没有中日韩字形，
+  因此简体版把**两个槽都换成 `Noto Sans SC` 完整字体**（30,890 字形，SIL OFL 1.1 许可）。
+  代价是 APK 比原版大 **约 12 MB**。
 - 本仓库**不包含**原始游戏 APK，复现需要自备基础包。
 - 原游戏 © Zero++ Software, 2016，本补丁仅供个人保存使用，非商业用途。
 
