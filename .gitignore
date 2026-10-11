@@ -1,0 +1,15 @@
+# never commit the game itself
+apk/
+work/
+base/
+*.apk
+!docs/*.txt
+# scratch
+__pycache__/
+*.pyc
+out/
+zh/batches/
+zh/out/
+zh/out_s/
+zh/pylibs/
+zh/font/
