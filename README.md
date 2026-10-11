@@ -170,7 +170,7 @@ an agentic coding CLI) driving **DeepSeek** models.
 ## 中文说明
 
 这是 *Darkness Survival*（Zero++ Software, 2016）**非官方、非商业的离线保存补丁**。
-游戏服务器多年前已停运，本补丁让它在完全离线的情况下可玩，并加入**简体/繁体中文**。
+游戏服务器多年前已停运，本补丁让它在完全离线的情况下可玩，并加入**简体中文**。
 
 基于 [MichaelExperuim](https://github.com/MichaelExperuim/darkness-survival-restored)
 的社区修复版（1.1.29）。原修复版的所有功劳归其作者。
@@ -194,7 +194,7 @@ an agentic coding CLI) driving **DeepSeek** models.
 2. 把 APK 传到手机，点击安装，按提示允许"安装未知应用"。
 3. 启动后直接进标题画面，不再出现 "Connecting to the Server"。
 
-需要设备支持 32 位 `armeabi`。已在 Android 14 / Origin OS 上实测可运行。
+需要设备支持 32 位 `armeabi`。已在 Android 14 上实测可运行。
 
 ### 主要修复
 
