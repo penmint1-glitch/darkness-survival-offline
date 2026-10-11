@@ -199,8 +199,9 @@ placeholders that the game overwrites at runtime, and editing them corrupts the
 rich-text path that fills the glyph atlas (that was the cause of a crash when
 tapping an equippable item).
 
-The font is a single CJK face installed into **both** `assets/SeoulNamsanEB.ttf`
-and `assets/arial.ttf`; the game may render a given label through either slot.
+The font is a single CJK face — **Noto Sans SC** (SIL Open Font License 1.1) —
+installed into **both** `assets/SeoulNamsanEB.ttf` and `assets/arial.ttf`, since
+the game may render a given label through either slot. See `docs/LICENSE-FONT.txt`.
 
 Terminology follows a Western-fantasy / tabletop register (精准度 Accuracy,
 警戒陷阱 Alarm Trap, 毁灭护符 Amulet of Destruction, 奥术 Arcane, 镜像 Mirror
@@ -215,7 +216,8 @@ the Chinese localization were produced with **[DeepSeek Harness](https://github.
 (`@deepseek-ai/dsh`), an agentic coding CLI driving **DeepSeek** models.
 
 * **Base restoration:** [MichaelExperuim/darkness-survival-restored](https://github.com/MichaelExperuim/darkness-survival-restored)
-* **Reference localization:** the Simplified-Chinese text and the bundled CJK font
-  are adapted from a pre-existing fan translation (游乐园汉化), with its
-  machine-translation errors repaired and its watermark/attribution strings removed.
+* **Reference localization:** the Simplified-Chinese text is adapted from a
+  pre-existing fan translation (游乐园汉化), with its machine-translation errors
+  repaired and its watermark/attribution strings removed. Its bundled font was a
+  commercial Founder face and has been **replaced** with Noto Sans SC (OFL).
 * **Original game:** Darkness Survival, © Zero++ Software, 2016
