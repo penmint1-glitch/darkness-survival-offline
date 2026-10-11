@@ -4,8 +4,11 @@ FONT LICENSING
 The APKs bundle one CJK face, installed into BOTH `assets/SeoulNamsanEB.ttf`
 and `assets/arial.ttf` (the game may render a given label through either slot).
 
-Face: **Noto Sans SC** (Regular), 30890 glyphs, 8,331,336 bytes.
+Face: **Noto Sans SC** (Regular), **subsetted** — 1,520 glyphs / 325,884 bytes per
+slot (the upstream face has 30,890 glyphs / 8,331,336 bytes and is installed into
+both slots, so 651,768 bytes uncompressed in total).
 Upstream: https://github.com/notofonts/noto-cjk  (Sans/SubsetOTF/SC/NotoSansSC-Regular.otf)
+Regenerate the subset with `tools/subset_font.py`.
 Licence: **SIL Open Font License 1.1** — redistribution inside an application is
 permitted, including for commercial use, provided the licence text is bundled and
 the font is not sold on its own.
@@ -24,9 +27,11 @@ has been removed.
 Coverage notes
 --------------
 * Every character used by the Simplified-Chinese text table and the 330 Cocos
-  Studio `.csb` layouts exists in this face — verified against the font's cmap.
-  The only miss was U+200B (zero-width space), injected by the reference
-  localization; those occurrences have been stripped from the text table.
+  Studio `.csb` layouts exists in this face — verified against the subset's cmap:
+  0 missing for the text table (1,401 non-ASCII characters) and 0 missing for
+  printable ASCII. The only earlier miss was U+200B (zero-width space), injected
+  by the reference localization; those occurrences were stripped from the text
+  table before subsetting.
 * The native library contains 379 Hangul syllables in hard-coded strings. Noto
   Sans SC has no Hangul. This is **cosmetic, not a crash**: the game renders
   missing glyphs as blank, and the same gap existed in the previously shipped
